@@ -169,7 +169,7 @@ public:
 	}
 	void putInArray(int index, Interface* element) // Вставка элемента в массив по индексу
 	{
-		if (index >= 0 && index < size) {
+		if (index >= 0 && index < size + 1) {
 			if (size + 1 >= capacity) { capacity *= 2; }
 			Interface** newArr = new Interface * [size + 1];
 			for (int i = 0; i < index; i++) { newArr[i] = array[i]; }
@@ -229,7 +229,7 @@ int main() {
 
 	Container c2(1);
 	int start_time = clock();
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 10000; i++) {
 		switch (randomNumber(0,2)) {
 		case 0: // Создание и вставка объекта
 			switch (randomNumber(0,1)) {
