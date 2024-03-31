@@ -42,7 +42,7 @@ private:
 	int capacity;
 	int size;
 public:
-	Container() : capacity(1), size(0), array(new Interface*[capacity]) {} //???
+	Container() : capacity(1), size(0), array(new Interface*[1]) {}
 	Container(int capacity) : capacity(capacity), size(0), array(new Interface* [capacity]) {}
 	Container(const Container& c) : capacity(c.capacity), size(c.size), array(new Interface*[c.capacity]) {}
 	~Container() {
@@ -120,7 +120,8 @@ public:
 		array = newArr;
 		if (!elemFind) {
 			printf("Element below not found:\n");
-			element->printInf();
+			if (element != nullptr) { element->printInf(); }
+			else { printf("Element doesn't exist\n"); }
 		}
 
 	}
@@ -128,13 +129,10 @@ public:
 		kickObj(element);
 		delete element;
 	}
-	void currentObj() { // ???
-
-	}
 	Interface* nextObj(Interface* element) {
 		for (int i = 0; i < size; i++) {
 			if (array[i] == element) {
-				if (i + 1 == size) { throw "Next object isn't exist\n"; }
+				if (i + 1 == size) { throw "Next object doesn't exist\n"; }
 				else { return array[i + 1]; }
 			}
 		}
@@ -144,7 +142,7 @@ public:
 	Interface* prevObj(Interface* element) {
 		for (int i = 0; i < size; i++) {
 			if (array[i] == element) {
-				if (i == 0) { throw "Previous object isn't exist\n"; }
+				if (i == 0) { throw "Previous object doesn't exist\n"; }
 				else { return array[i - 1]; }
 			}
 		}
@@ -171,19 +169,30 @@ public:
 	}
 	void putInArray(int index, Interface* element) // Вставка элемента в массив по индексу
 	{
-		Interface** newArr = new Interface * [size + 1];
-		for (int i = 0; i < index; i++) { newArr[i] = array[i]; }
-		newArr[index] = element;
-		for (int i = index + 1; i < size + 1; i++) { newArr[i] = array[i - 1]; }
-		size++;
-		delete[] array;
-		array = newArr;
+		if (index >= 0 && index < size) {
+			if (size + 1 >= capacity) { capacity *= 2; }
+			Interface** newArr = new Interface * [size + 1];
+			for (int i = 0; i < index; i++) { newArr[i] = array[i]; }
+			newArr[index] = element;
+			for (int i = index + 1; i < size + 1; i++) { newArr[i] = array[i - 1]; }
+			size++;
+			delete[] array;
+			array = newArr;
+		}
+		else { throw "Index out of massive range\n"; }
 	}
 };
 
 int randomNumber(int start, int end) { return rand() % (end - start + 1) + start; }
 
+int lastElem(int elemIndex) {
+	if (elemIndex > 0) { return elemIndex - 1; }
+	else { return 0; }
+}
+
 int main() {
+	srand(time(0));
+
 	Container c(2);
 	for (int i = 0; i < 10; i++) {
 		if (i % 2) {
@@ -195,8 +204,10 @@ int main() {
 	}
 	c.push_front(new Point(4, 3, 2));
 	c.push_middle(new Number(7));
-	c.kickObj(c[11]);
 	Interface* obj = c[10];
+	c.kickObj(c[10]);
+	obj->printInf();
+	obj = c[10];
 	c.deleteObj(c[10]);
 	//obj->printInf();
 	try { c.nextObj(c[9])->printInf(); }
@@ -213,45 +224,38 @@ int main() {
 	else { printf("n not in container\n"); }
 	printf("--------------------------------------------\n");
 	printf("Size = %d\nCapacity = %d\n", c.getSize(), c.getCapacity());
-	for (int i = 0; i < c.getSize(); i++) {
-		c[i]->printInf();
-	}
+	for (int i = 0; i < c.getSize(); i++) { c[i]->printInf(); }
+	printf("--------------------------------------------\n");
 
-	Container c2(100);
+	Container c2(1);
 	int start_time = clock();
-	for (int i = 0; i < 100; i++) {
-		c2.putInArray(randomNumber(0, c.getSize() - 1), new Point());
-	}
-	/*for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 10; i++) {
 		switch (randomNumber(0,2)) {
 		case 0: // Создание и вставка объекта
 			switch (randomNumber(0,1)) {
 			case 0: //Point
-				if (c2.getSize() > 0) { c2.putInArray(randomNumber(0, c.getSize() - 1), new Point()); }
-				else { c2.push_back(new Point()); }
+				c2.putInArray(randomNumber(0, lastElem(c2.getSize())), new Point(i,i,i));
 				break;
 			case 1://Number
-				//if (c2.getSize() > 0) { c2.putInArray(randomNumber(0, c.getSize() - 1), new Number()); }
-				//else { c2.push_back(new Point()); }
+				c2.putInArray(randomNumber(0, lastElem(c2.getSize())), new Number(i));
 				break;
 			}
 			break;
 		case 1: // Удаление и уничтожение случайного объекта
 			switch (randomNumber(0, 1)) {
 			case 0: // Удаление без уничтожения
-				//if (c2.getSize() > 0) { c.kickObj(c[randomNumber(0, c.getSize() - 1)]); }
+				if (c2.getSize() > 0) { c2.kickObj(c2[randomNumber(0, lastElem(c2.getSize()))]); }
 				break;
 			case 1: // Удаление с уничтожением
-				//if (c2.getSize() > 0) { c.deleteObj(c[randomNumber(0, c.getSize() - 1)]); }
+				if (c2.getSize() > 0) { c2.deleteObj(c2[randomNumber(0, lastElem(c2.getSize()))]); }
 				break;
 			break;
 			}
 		case 2: // Вызов метода printinf у случайного объекта
-			//c2[randomNumber(0, c.getSize() - 1)]->printInf();
+			if (c2.getSize() > 0) { c2[randomNumber(0, lastElem(c2.getSize()))]->printInf(); }
 			break;
 		}
 	}
-	*/
 	int end_time = clock();
 	printf("Work time: %d mls\n", end_time - start_time);
 	printf("Size = %d\nCapacity = %d\n", c2.getSize(), c2.getCapacity());
