@@ -46,7 +46,7 @@ public:
 	Container(int capacity) : capacity(capacity), size(0), array(new Interface* [capacity]) {}
 	Container(const Container& c) : capacity(c.capacity), size(c.size), array(new Interface*[c.capacity]) {}
 	~Container() {
-		clear();
+		delete[] array; // не clear т.к. объекты удалять не нужно
 	}
 
 	void clear() {
@@ -66,7 +66,7 @@ public:
 			delete[] array;
 			array = newArr;
 		}
-		array[size++] = element; //unique_ptr
+		array[size++] = element;
 	}
 	void push_front(Interface* element) {
 		if (size >= capacity) { capacity *= 2; }
@@ -74,7 +74,7 @@ public:
 		newArr[0] = element;
 		size++;
 		for (int i = 0; i < size; i++) {
-			newArr[i + 1] = array[i]; //unique_ptr
+			newArr[i + 1] = array[i];
 		}
 		delete[] array;
 		array = newArr;
@@ -84,23 +84,11 @@ public:
 		Interface** newArr = new Interface * [capacity];
 		size++;
 		int middle = 0;
-		if (size % 2 == 0) {
-			middle = size / 2 - 1;
-			newArr[middle] = element;
-		}
-		else {
-			middle = size / 2;
-			newArr[middle] = element;
-		}
-		for (int i = 0; i < size; i++) {
-			if (i >= middle) {
-				newArr[i + 1] = array[i];
-			}
-			else {
-				newArr[i] = array[i];
-			}
-			
-		}
+		if (size % 2 == 0) { middle = size / 2 - 1; }
+		else { middle = size / 2; }
+		for (int i = 0; i < middle; i++) { newArr[i] = array[i]; }
+		newArr[middle] = element;
+		for (int i = middle + 1; i < size; i++) { newArr[i] = array[i - 1]; }
 		delete[] array;
 		array = newArr;
 	}
@@ -193,6 +181,14 @@ int lastElem(int elemIndex) {
 int main() {
 	srand(time(0));
 
+	Container c3;
+	for (int i = 0; i < 2; i++) { c3.push_back(new Number(i)); }
+	c3.push_middle(new Point);
+	for (int i = 0; i < 3; i++) { c3[i]->printInf(); }
+	printf("Size = %d\nCapacity = %d\n", c3.getSize(), c3.getCapacity());
+	c3.clear();
+	printf("--------------------------------------------\n");
+
 	Container c(2);
 	for (int i = 0; i < 10; i++) {
 		if (i % 2) {
@@ -225,6 +221,7 @@ int main() {
 	printf("--------------------------------------------\n");
 	printf("Size = %d\nCapacity = %d\n", c.getSize(), c.getCapacity());
 	for (int i = 0; i < c.getSize(); i++) { c[i]->printInf(); }
+	c.clear();
 	printf("--------------------------------------------\n");
 
 	Container c2(1);
@@ -259,6 +256,7 @@ int main() {
 	int end_time = clock();
 	printf("Work time: %d mls\n", end_time - start_time);
 	printf("Size = %d\nCapacity = %d\n", c2.getSize(), c2.getCapacity());
+	c2.clear();
 	printf("End");
 	return 0;
 }
