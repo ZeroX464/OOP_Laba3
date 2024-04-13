@@ -226,6 +226,9 @@ int main() {
 
 	Container c2(1);
 	int start_time = clock();
+	for (int i = 0; i < c2.getSize(); i++) {
+		c2[i]->printInf();
+	}
 	for (int i = 0; i < 10000; i++) {
 		switch (randomNumber(0,2)) {
 		case 0: // Создание и вставка объекта
